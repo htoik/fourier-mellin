@@ -10,6 +10,7 @@
 
 class FourierMellinSimple {
    public:
+    FourierMellinSimple(const cv::Mat& reference);
     FourierMellinSimple(std::string_view reference_fp);
 
     Transform RegisterImage(const cv::Mat& target) const;
@@ -25,6 +26,8 @@ class FourierMellinSimple {
     ~FourierMellinSimple() = default;
 
    private:
+    cv::Mat ReadGrayscaleImageFromFile(std::string_view img_fp) const;
+    cv::Mat PreprocessImage(const cv::Mat& img) const;
     cv::Mat ConvertImageToLogPolar(const cv::Mat& img) const;
 
    private:

@@ -122,9 +122,17 @@ PYBIND11_MODULE(MODULE_NAME, m) {
 
     py::class_<FourierMellinSimple>(m, "FourierMellin")
         .def(py::init<std::string_view>())
+        .def(py::init([](py::array_t<float> reference) {
+            auto referenceMat = numpy_to_mat<0>(reference).clone();
+            return new FourierMellinSimple(referenceMat);
+        }))
         .def("register_image", [](const FourierMellinSimple& fm, std::string_view target_fp) -> auto {
                     auto[transformed, transform] = fm.GetRegisteredImage(target_fp);
-                    return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target");
+                    return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target")
+        .def("register_image", [](const FourierMellinSimple& fm, py::array_t<float> target) -> auto {
+            auto targetMat = numpy_to_mat<0>(target).clone();
+            auto[transformed, transform] = fm.GetRegisteredImage(targetMat);
+            return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target");
 
     m.def("get_transformed", [](const py::array_t<float>& img, Transform transform) {
         auto mat = numpy_to_mat<0>(img);
