@@ -74,3 +74,4 @@ cmake --build build/release -j 8
 - angles beyond -90 to 90 deg
 - updated readme with up to date information
 - pure python version that for windows/macos
+- memory problem when passing in reference to some functions, where image is replaced (clearer documentation?)

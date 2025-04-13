@@ -31,12 +31,21 @@ Transform FourierMellinSimple::RegisterImage(const cv::Mat& target) const {
 }
 
 Transform FourierMellinSimple::RegisterImage(std::string_view target_fp) const {
-    cv::Mat img1 = cv::imread(std::string(target_fp), cv::IMREAD_GRAYSCALE);
-    img1.convertTo(img1, CV_32F, 1.0 / 255.0);
-    return RegisterImage(img1);
+    cv::Mat target = cv::imread(std::string(target_fp), cv::IMREAD_GRAYSCALE);
+    target.convertTo(target, CV_32F, 1.0 / 255.0);
+    return RegisterImage(target);
+}
+
+std::tuple<cv::Mat, Transform> FourierMellinSimple::GetRegisteredImage(const cv::Mat& target) const {
+    const auto& transform = RegisterImage(target);
+    const auto& aligned = getTransformed(target, transform);
+    return {aligned, transform};
 }
 
 std::tuple<cv::Mat, Transform> FourierMellinSimple::GetRegisteredImage(std::string_view target_fp) const {
+    cv::Mat target = cv::imread(std::string(target_fp), cv::IMREAD_GRAYSCALE);
+    target.convertTo(target, CV_32F, 1.0 / 255.0);
+    return GetRegisteredImage(target);
 }
 
 cv::Mat FourierMellinSimple::ConvertImageToLogPolar(const cv::Mat& img) const {

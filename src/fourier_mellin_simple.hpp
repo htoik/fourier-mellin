@@ -15,6 +15,7 @@ class FourierMellinSimple {
     Transform RegisterImage(const cv::Mat& target) const;
     Transform RegisterImage(std::string_view target_fp) const;
 
+    std::tuple<cv::Mat, Transform> GetRegisteredImage(const cv::Mat& target) const;
     std::tuple<cv::Mat, Transform> GetRegisteredImage(std::string_view target_fp) const;
 
     FourierMellinSimple(const FourierMellinSimple&) = delete;
