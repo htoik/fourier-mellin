@@ -58,11 +58,8 @@ cv2.imwrite("transformed.jpg", transformed)
 Building without pip is not required for use with python. Building without pip requires installing additional dependencies, such as pybind11. This step may be skipped, in case only python bindings are used.
 
 ```
-mkdir -p build/release
-cd build/release
-cmake ../.. -DCMAKE_BUILD_TYPE=Release
-cd ../..
-cmake --build build/release -j 4
+cmake -B build/release -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build/release -j 8
 ```
 
 ## Todo
@@ -76,3 +73,4 @@ cmake --build build/release -j 4
 - Documentation
 - Proper threading support
 - angles beyond -90 to 90 deg
+- updated readme with up to date information

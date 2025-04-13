@@ -65,31 +65,6 @@ py::array_t<float> mat_to_numpy(const cv::Mat& mat) {
     );
 }
 
-struct PyLogPolarMap{
-    int logPolarSize;
-    double logBase;
-    py::array_t<float> xMap;
-    py::array_t<float> yMap;
-
-    static PyLogPolarMap ConvertFromLogPolarMap(const LogPolarMap& polarMap){
-        return PyLogPolarMap{
-            .logPolarSize = polarMap.logPolarSize,
-            .logBase = polarMap.logBase,
-            .xMap = mat_to_numpy(polarMap.xMap),
-            .yMap = mat_to_numpy(polarMap.yMap),
-        };
-    }
-
-    LogPolarMap ConvertToLogPolarMap(){
-        return LogPolarMap{
-            .logPolarSize = logPolarSize,
-            .logBase = logBase,
-            .xMap = numpy_to_mat<1>(xMap),
-            .yMap = numpy_to_mat<1>(yMap),
-        };
-    }
-};
-
 template <typename T>
 std::string to_string_with_precision(const T value, const int n=2){
     std::ostringstream out;
@@ -158,24 +133,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             auto[transformed, transform] = fm.GetRegisteredImage(mat0, mat1);
             return std::make_tuple(mat_to_numpy(transformed), transform);
         }, "Register Image");
-
-    m.def("process_image", [](const py::array_t<float>& img, const py::array_t<float>& highPassFilter, const py::array_t<float>& apodizationWindow, PyLogPolarMap logPolarMap){
-        auto logPolarMap2 = logPolarMap.ConvertToLogPolarMap();
-        auto img2 = numpy_to_mat<1>(img);
-        auto highPassFilter2 = numpy_to_mat<2>(highPassFilter);
-        auto apodizationWindow2 = numpy_to_mat<1>(apodizationWindow);
-        auto logPolarImg = getProcessedImage(img2, highPassFilter2, apodizationWindow2, logPolarMap2);
-        return mat_to_numpy(logPolarImg);
-    }, "Process Image");
-
-    m.def("register_image", [](const py::array_t<float>& img0, const py::array_t<float>& img1, const py::array_t<float>& logPolar0, const py::array_t<float>& logPolar1, PyLogPolarMap logPolarMap){
-        auto mat0 = numpy_to_mat<1>(img0);
-        auto mat1 = numpy_to_mat<1>(img1);
-        auto matLogPolar0 = numpy_to_mat<1>(logPolar0);
-        auto matLogPolar1 = numpy_to_mat<1>(logPolar1);
-        auto logPolarMap2 = logPolarMap.ConvertToLogPolarMap();
-        return registerGrayImage(mat0, mat1, matLogPolar0, matLogPolar1, logPolarMap2);
-    }, "Register Images");
 
     m.def("get_transformed", [](const py::array_t<float>& img, Transform transform){
         auto mat = numpy_to_mat<0>(img);
