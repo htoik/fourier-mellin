@@ -1,19 +1,9 @@
 build/
-images/
-other/
-resources/
-*.jpg
-*.mp4
 __pycache__/
 *.pytest_cache/
 *.so
 
-.vscode/
-venv/
-.venv/
-
 *.egg-info/
 dist/
 _skbuild/
-clean.bash
 wheelhouse/

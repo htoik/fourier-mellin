@@ -75,3 +75,4 @@ cmake --build build/release -j 4
 - cv::phaseCorrelate already applies Hanning Window
 - Documentation
 - Proper threading support
+- angles beyond -90 to 90 deg
