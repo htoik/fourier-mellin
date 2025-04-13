@@ -108,18 +108,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
         .def("response", [](const Transform& t) { return t.GetResponse(); }, "Get Response")
         .def("to_dict", [](const Transform& t) { return py::dict("x"_a = t.GetOffsetX(), "y"_a = t.GetOffsetY(), "scale"_a = t.GetScale(), "rotation"_a = t.GetRotation(), "response"_a = t.GetResponse()); });
 
-    py::class_<FourierMellin>(m, "FourierMellinOld")
-        .def(py::init<int, int>())
-        .def("process_image", [](const FourierMellin& fm, py::array_t<float> img) -> auto {
-            auto mat = numpy_to_mat<1>(img);
-            auto matProcessed = fm.GetProcessImage(mat);
-            return mat_to_numpy(matProcessed); }, "Process Image")
-        .def("register_image", [](const FourierMellin& fm, const py::array_t<float>& img0, const py::array_t<float>& img1) -> auto {
-            auto mat0 = numpy_to_mat<0>(img0);
-            auto mat1 = numpy_to_mat<0>(img1);
-            auto[transformed, transform] = fm.GetRegisteredImage(mat0, mat1);
-            return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register Image");
-
     py::class_<FourierMellinSimple>(m, "FourierMellin")
         .def(py::init<std::string_view>())
         .def(py::init([](py::array_t<float> reference) {

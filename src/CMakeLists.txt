@@ -3,7 +3,6 @@ cmake_minimum_required(VERSION 3.27)
 find_package(OpenCV REQUIRED)
 
 set(SOURCES
-    fourier_mellin.cpp
     fourier_mellin_simple.cpp
     utilities.cpp
     transform.cpp
