@@ -1,5 +1,5 @@
-#ifndef __FOURIER_MELLIN_SIMPLE_H__
-#define __FOURIER_MELLIN_SIMPLE_H__
+#ifndef __FOURIER_MELLIN_H__
+#define __FOURIER_MELLIN_H__
 
 #include <iostream>
 #include <string_view>
@@ -8,10 +8,10 @@
 #include "transform.hpp"
 #include "utilities.hpp"
 
-class FourierMellinSimple {
+class FourierMellin {
    public:
-    FourierMellinSimple(const cv::Mat& reference);
-    FourierMellinSimple(std::string_view reference_fp);
+    FourierMellin(const cv::Mat& reference);
+    FourierMellin(std::string_view reference_fp);
 
     Transform RegisterImage(const cv::Mat& target) const;
     Transform RegisterImage(std::string_view target_fp) const;
@@ -19,11 +19,11 @@ class FourierMellinSimple {
     std::tuple<cv::Mat, Transform> GetRegisteredImage(const cv::Mat& target) const;
     std::tuple<cv::Mat, Transform> GetRegisteredImage(std::string_view target_fp) const;
 
-    FourierMellinSimple(const FourierMellinSimple&) = delete;
-    FourierMellinSimple(FourierMellinSimple&&) = delete;
-    FourierMellinSimple& operator=(const FourierMellinSimple&) = delete;
-    FourierMellinSimple& operator=(FourierMellinSimple&&) = delete;
-    ~FourierMellinSimple() = default;
+    FourierMellin(const FourierMellin&) = delete;
+    FourierMellin(FourierMellin&&) = delete;
+    FourierMellin& operator=(const FourierMellin&) = delete;
+    FourierMellin& operator=(FourierMellin&&) = delete;
+    ~FourierMellin() = default;
 
    private:
     cv::Mat ReadGrayscaleImageFromFile(std::string_view img_fp) const;
@@ -41,4 +41,4 @@ class FourierMellinSimple {
     cv::Mat referenceImgLogPolar_;
 };
 
-#endif  // __FOURIER_MELLIN_SIMPLE_H__
+#endif // __FOURIER_MELLIN_H__

@@ -1,6 +1,6 @@
 #include "fourier_mellin_simple.hpp"
 
-FourierMellinSimple::FourierMellinSimple(const cv::Mat& reference) : referenceImg_(reference.clone())
+FourierMellin::FourierMellin(const cv::Mat& reference) : referenceImg_(reference.clone())
 {
     // TODO: assumes one channel, and normalized float, like other constructor
     // if (referenceImg_.depth() != CV_32F) {
@@ -13,14 +13,12 @@ FourierMellinSimple::FourierMellinSimple(const cv::Mat& reference) : referenceIm
     highPassFilter_ = getHighPassFilter(height_, width_);
     apodizationWindow_ = getApodizationWindow(width_, height_, std::min(width_, height_));
 
-    // referenceImg_ = PreprocessImage(referenceImg_);
     referenceImgLogPolar_ = ConvertImageToLogPolar(referenceImg_);
 }
 
-FourierMellinSimple::FourierMellinSimple(std::string_view reference_fp) : FourierMellinSimple(ReadGrayscaleImageFromFile(reference_fp)) {}
+FourierMellin::FourierMellin(std::string_view reference_fp) : FourierMellin(ReadGrayscaleImageFromFile(reference_fp)) {}
 
-Transform FourierMellinSimple::RegisterImage(const cv::Mat& target) const {
-    // auto targetProcessed = PreprocessImage(target);
+Transform FourierMellin::RegisterImage(const cv::Mat& target) const {
     const auto& logPolarTarget = ConvertImageToLogPolar(target);
 
     double responseScaleRotation;
@@ -39,30 +37,30 @@ Transform FourierMellinSimple::RegisterImage(const cv::Mat& target) const {
     return Transform{-xOffset, yOffset, scale, rotation, response};
 }
 
-Transform FourierMellinSimple::RegisterImage(std::string_view target_fp) const {
+Transform FourierMellin::RegisterImage(std::string_view target_fp) const {
     auto target = ReadGrayscaleImageFromFile(target_fp);
     return RegisterImage(target);
 }
 
-std::tuple<cv::Mat, Transform> FourierMellinSimple::GetRegisteredImage(const cv::Mat& target) const {
+std::tuple<cv::Mat, Transform> FourierMellin::GetRegisteredImage(const cv::Mat& target) const {
     const auto& transform = RegisterImage(target);
     const auto& aligned = getTransformed(target, transform);
     return {aligned, transform};
 }
 
-std::tuple<cv::Mat, Transform> FourierMellinSimple::GetRegisteredImage(std::string_view target_fp) const {
+std::tuple<cv::Mat, Transform> FourierMellin::GetRegisteredImage(std::string_view target_fp) const {
     auto target = ReadGrayscaleImageFromFile(target_fp);
     return GetRegisteredImage(target);
 }
 
-cv::Mat FourierMellinSimple::ConvertImageToLogPolar(const cv::Mat& img) const {
+cv::Mat FourierMellin::ConvertImageToLogPolar(const cv::Mat& img) const {
     auto img2 = PreprocessImage(img);
     cv::Mat log_polar;
     cv::remap(img2, log_polar, logPolarMap_.xMap, logPolarMap_.yMap, cv::INTER_LANCZOS4, cv::BORDER_CONSTANT, cv::Scalar());
     return log_polar;
 }
 
-cv::Mat FourierMellinSimple::PreprocessImage(const cv::Mat& img) const {
+cv::Mat FourierMellin::PreprocessImage(const cv::Mat& img) const {
     cv::Mat apodized = img.mul(apodizationWindow_);
     cv::Mat dftResult = fft(apodized);
     cv::Mat filtered = fftShift(dftResult);
@@ -75,7 +73,7 @@ cv::Mat FourierMellinSimple::PreprocessImage(const cv::Mat& img) const {
     return magnitude;
 }
 
-cv::Mat FourierMellinSimple::ReadGrayscaleImageFromFile(std::string_view img_fp) const {
+cv::Mat FourierMellin::ReadGrayscaleImageFromFile(std::string_view img_fp) const {
     cv::Mat img = cv::imread(std::string(img_fp), cv::IMREAD_GRAYSCALE);
     img.convertTo(img, CV_32F, 1.0 / 255.0);
     return img;

@@ -6,7 +6,6 @@
 #include <sstream>
 
 #include "fourier_mellin.hpp"
-#include "fourier_mellin_simple.hpp"
 
 #ifndef MODULE_NAME
 #error "MODULE_NAME is not defined"
@@ -108,16 +107,16 @@ PYBIND11_MODULE(MODULE_NAME, m) {
         .def("response", [](const Transform& t) { return t.GetResponse(); }, "Get Response")
         .def("to_dict", [](const Transform& t) { return py::dict("x"_a = t.GetOffsetX(), "y"_a = t.GetOffsetY(), "scale"_a = t.GetScale(), "rotation"_a = t.GetRotation(), "response"_a = t.GetResponse()); });
 
-    py::class_<FourierMellinSimple>(m, "FourierMellin")
+    py::class_<FourierMellin>(m, "FourierMellin")
         .def(py::init<std::string_view>())
         .def(py::init([](py::array_t<float> reference) {
             auto referenceMat = numpy_to_mat<0>(reference).clone();
-            return new FourierMellinSimple(referenceMat);
+            return new FourierMellin(referenceMat);
         }))
-        .def("register_image", [](const FourierMellinSimple& fm, std::string_view target_fp) -> auto {
+        .def("register_image", [](const FourierMellin& fm, std::string_view target_fp) -> auto {
                     auto[transformed, transform] = fm.GetRegisteredImage(target_fp);
                     return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target")
-        .def("register_image", [](const FourierMellinSimple& fm, py::array_t<float> target) -> auto {
+        .def("register_image", [](const FourierMellin& fm, py::array_t<float> target) -> auto {
             auto targetMat = numpy_to_mat<0>(target).clone();
             auto[transformed, transform] = fm.GetRegisteredImage(targetMat);
             return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target");
