@@ -126,18 +126,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             return a.GetInverse();
         }, "Get Inverse Transform")
 
-        // .def("__add__",[](const Transform &a, const Transform& b) {
-        //     return a + b;
-        // }, py::is_operator())
-        // .def("__sub__",[](const Transform &a, const Transform& b) {
-        //     return a - b;
-        // }, py::is_operator())
-        // .def("__iadd__",[](Transform &a, const Transform& b) {
-        //     return a += b;
-        // }, py::is_operator())
-        // .def("__isub__",[](Transform &a, const Transform& b) {
-        //     return a -= b;
-        // }, py::is_operator())
         .def("x", [](const Transform& t) {
             return t.GetOffsetX();
         }, "Get X Offset")
@@ -156,13 +144,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
         .def("to_dict", [](const Transform& t){
             return py::dict("x"_a=t.GetOffsetX(), "y"_a=t.GetOffsetY(), "scale"_a=t.GetScale(), "rotation"_a=t.GetRotation(), "response"_a=t.GetResponse());
         });
-        
-    py::class_<PyLogPolarMap>(m, "LogPolarMap")
-        .def(py::init<>())
-        .def_readwrite("log_polar_size", &PyLogPolarMap::logPolarSize)
-        .def_readwrite("log_base", &PyLogPolarMap::logBase)
-        .def_readwrite("x_map", &PyLogPolarMap::xMap)
-        .def_readwrite("y_map", &PyLogPolarMap::yMap);
 
     py::class_<FourierMellin>(m, "FourierMellin")
         .def(py::init<int, int>())
@@ -177,120 +158,6 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             auto[transformed, transform] = fm.GetRegisteredImage(mat0, mat1);
             return std::make_tuple(mat_to_numpy(transformed), transform);
         }, "Register Image");
-
-    py::class_<FourierMellinContinuous>(m, "FourierMellinContinuous")
-        .def(py::init<int, int>())
-        .def(py::init<int, int, double, double>())
-        .def("register_image", [](FourierMellinContinuous& fm, const py::array_t<float>& img) -> auto {
-            auto mat0 = numpy_to_mat<0>(img);
-            auto[transformed, transform] = fm.GetRegisteredImage(mat0);
-            return std::make_tuple(mat_to_numpy(transformed), transform);
-        }, "Register Image");
-
-    py::class_<FourierMellinWithReference>(m, "FourierMellinWithReference")
-        .def(py::init<int, int>())
-        .def("set_reference", [](FourierMellinWithReference& fm, const py::array_t<float>& img, int designation=-1) -> auto {
-            auto mat = numpy_to_mat<0>(img);
-            pybind11::gil_scoped_release release;
-            fm.SetReference(mat, designation);
-            pybind11::gil_scoped_acquire acquire;
-        }, "Set Reference")
-        .def("set_reference_with_designation", [](FourierMellinWithReference& fm, int designation) -> auto {
-            fm.SetReferenceWithDesignation(designation);
-        }, "Set Reference")
-        .def("register_image", [](FourierMellinWithReference& fm, const py::array_t<float>& img) -> auto {
-            auto mat = numpy_to_mat<0>(img);
-            pybind11::gil_scoped_release release;
-            auto[transformed, transform] = fm.GetRegisteredImage(mat);
-            pybind11::gil_scoped_acquire acquire;
-            return std::make_tuple(mat_to_numpy(transformed), transform);
-        }, "Register Image")
-        .def("register_image_only_transform", [](FourierMellinWithReference& fm, const py::array_t<float>& img) -> auto {
-            auto mat = numpy_to_mat<0>(img);
-            pybind11::gil_scoped_release release;
-            auto[transformed, transform] = fm.GetRegisteredImage(mat);
-            // pybind11::gil_scoped_acquire acquire;
-            return transform;
-        }, "Register Image but return only the transform.")
-        .def("register_image_batched", [](FourierMellinWithReference& fm, const py::list imgs) -> auto {
-            std::vector<cv::Mat> imgsMat;
-            std::vector<std::tuple<cv::Mat, Transform>> results;
-            unsigned imgsSize = imgs.size();
-            imgsMat.reserve(imgsSize);
-            results.reserve(imgsSize);
-
-            for(const auto& img : imgs){
-                if(!py::isinstance<py::array>(img)){
-                    throw std::runtime_error("List element is not a NumPy array.");
-                }
-                auto mat = numpy_to_mat<0>(py::cast<py::array_t<float>>(img));
-                imgsMat.push_back(mat);
-            }
-
-            {
-                pybind11::gil_scoped_release release;
-                for(const auto& mat : imgsMat){
-                    auto[transformed, transform] = fm.GetRegisteredImage(mat);
-                    results.push_back(std::make_tuple(transformed, transform));
-                }
-            }
-            
-            pybind11::gil_scoped_acquire acquire;
-            py::list pyresults;
-
-            for(const auto&[transformed, transform] : results){
-                pyresults.append(py::make_tuple(mat_to_numpy(transformed), transform));
-            }
-
-            return pyresults;
-        }, "Register image in batches.")
-        .def("register_image_batched_only_transform", [](FourierMellinWithReference& fm, const py::list imgs) -> auto {
-            std::vector<cv::Mat> imgsMat;
-            std::vector<Transform> results;
-            unsigned imgsSize = imgs.size();
-            imgsMat.reserve(imgsSize);
-            results.reserve(imgsSize);
-
-            for(const auto& img : imgs){
-                if(!py::isinstance<py::array>(img)){
-                    throw std::runtime_error("List element is not a NumPy array.");
-                }
-                auto mat = numpy_to_mat<0>(py::cast<py::array_t<float>>(img));
-                imgsMat.push_back(mat);
-            }
-
-            {
-                pybind11::gil_scoped_release release;
-                for(const auto& mat : imgsMat){
-                    const auto& transform = fm.GetRegisteredImageTransform(mat);
-                    results.push_back(transform);
-                }
-            }
-            
-            pybind11::gil_scoped_acquire acquire;
-            py::list pyresults;
-
-            for(const auto& transform : results){
-                pyresults.append(transform);
-            }
-
-            return pyresults;
-        }, "Register image in batches without returning transformed images.");
-
-    m.def("get_filters", [](int cols, int rows) -> auto {
-        auto highPassFilter = getHighPassFilter(rows, cols);
-        auto apodizationWindow = getApodizationWindow(cols, rows, std::min(rows, cols));
-
-        auto highPassFilter2 = mat_to_numpy(highPassFilter);
-        auto apodizationWindow2 = mat_to_numpy(apodizationWindow);
-
-        return std::make_tuple(highPassFilter2, apodizationWindow2);
-    }, "Do something");
-
-    m.def("create_log_polar_map", [](int cols, int rows) -> auto {
-        auto polarMap = createLogPolarMap(cols, rows);
-        return PyLogPolarMap::ConvertFromLogPolarMap(polarMap);
-    }, "Do something");
 
     m.def("process_image", [](const py::array_t<float>& img, const py::array_t<float>& highPassFilter, const py::array_t<float>& apodizationWindow, PyLogPolarMap logPolarMap){
         auto logPolarMap2 = logPolarMap.ConvertToLogPolarMap();
