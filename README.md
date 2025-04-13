@@ -65,12 +65,12 @@ cmake --build build/release -j 8
 ## Todo
 
 - Register images directly from files
-- Windows/MacOS support
 - Benchmarking
 - Optimization
 - CUDA with OpenCV
-- cv::phaseCorrelate already applies Hanning Window
+- remove filters, as cv::phaseCorrelate already applies Hanning Window
 - Documentation
 - Proper threading support
 - angles beyond -90 to 90 deg
 - updated readme with up to date information
+- pure python version that for windows/macos
