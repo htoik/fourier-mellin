@@ -75,10 +75,10 @@ cv::Mat fftShift(const cv::Mat& in) {
 }
 
 cv::Mat linspace(float min, float max, size_t count){
-    cv::Mat result = cv::Mat::zeros(count, 1, CV_64F);
+    cv::Mat result = cv::Mat::zeros(count, 1, CV_32F);
     float step = (max - min) / (count - 1);
     for(size_t i=0; i<count; i++) {
-        result.at<double>(i, 0) = min + step * i;
+        result.at<float>(i, 0) = min + step * i;
     }
     return result;
 }
@@ -95,7 +95,7 @@ cv::Mat getHighPassFilter(int rows, int cols) {
     cv::Mat filter = cv::Mat(temp.size(), temp.type());
     for(int i=0; i<temp.rows; i++){
         for(int j=0; j<temp.cols; j++){
-            filter.at<double>(i, j) = std::cos(temp.at<double>(i, j));
+            filter.at<float>(i, j) = std::cos(temp.at<float>(i, j));
         }
     }
 

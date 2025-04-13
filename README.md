@@ -75,3 +75,4 @@ cmake --build build/release -j 8
 - updated readme with up to date information
 - pure python version that for windows/macos
 - memory problem when passing in reference to some functions, where image is replaced (clearer documentation?)
+- link time optimizer flto

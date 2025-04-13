@@ -34,6 +34,9 @@ class FourierMellinSimple {
     int width_, height_;
     LogPolarMap logPolarMap_;
 
+    cv::Mat highPassFilter_;
+    cv::Mat apodizationWindow_;
+    
     cv::Mat referenceImg_;
     cv::Mat referenceImgLogPolar_;
 };
