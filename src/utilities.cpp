@@ -90,9 +90,9 @@ cv::Mat getTransformed(const cv::Mat& img, const Transform& transform) {
 
     cv::Point2f center(img.cols/2.f, img.rows/2.f);
 
-    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, transform.GetRotation(), transform.GetScale());
-    rotationMatrix.at<double>(0, 2) += transform.GetOffsetX();
-    rotationMatrix.at<double>(1, 2) += -transform.GetOffsetY();
+    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, transform.rotation, transform.scale);
+    rotationMatrix.at<double>(0, 2) += transform.x;
+    rotationMatrix.at<double>(1, 2) += -transform.y;
 
     cv::Mat transformed = img.clone();
 

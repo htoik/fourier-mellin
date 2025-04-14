@@ -81,10 +81,15 @@ std::string to_string_with_precision(const T value, const int n = 2) {
 PYBIND11_MODULE(MODULE_NAME, m) {
     py::class_<Transform>(m, "Transform")
         .def(py::init<>())
-        .def(py::init<double, double, double, double, double>())
         .def("__repr__", [](const Transform& t) {
-            return "<" TOSTRING(MODULE_NAME) ".Transform x_offset=" + to_string_with_precision(t.GetOffsetX(), 2) + ", y_offset=" + to_string_with_precision(t.GetOffsetY(), 2) + ", rotation=" + to_string_with_precision(t.GetRotation(), 2) + ", scale=" + to_string_with_precision(t.GetScale(), 2) + ", response=" + to_string_with_precision(t.GetResponse(), 2) + ">";
+            // TODO: use the operator<< format previously defined instead for consistency
+            return "<" TOSTRING(MODULE_NAME) ".Transform x_offset=" + to_string_with_precision(t.x, 2) + ", y_offset=" + to_string_with_precision(t.y, 2) + ", rotation=" + to_string_with_precision(t.rotation, 2) + ", scale=" + to_string_with_precision(t.scale, 2) + ", response=" + to_string_with_precision(t.response, 2) + ">";
         })
+        .def_readwrite("x", &Transform::x, "x offset")
+        .def_readwrite("y", &Transform::y, "y offset")
+        .def_readwrite("scale", &Transform::scale, "scale")
+        .def_readwrite("rotation", &Transform::rotation, "rotation")
+        .def_readwrite("response", &Transform::response, "response")
         .def("__mul__", [](const Transform& a, const Transform& b) { return a * b; }, py::is_operator())
         .def("get_matrix", [](const Transform& a) {
             cv::Mat matrix = a.GetMatrix();
@@ -99,13 +104,7 @@ PYBIND11_MODULE(MODULE_NAME, m) {
                 {matrix.step[0], matrix.step[1]},
                 matrix.ptr<double>()); }, "Get Inverse Matrix")
         .def("get_inverse", [](const Transform& a) { return a.GetInverse(); }, "Get Inverse Transform")
-
-        .def("x", [](const Transform& t) { return t.GetOffsetX(); }, "Get X Offset")
-        .def("y", [](const Transform& t) { return t.GetOffsetY(); }, "Get Y Offset")
-        .def("scale", [](const Transform& t) { return t.GetScale(); }, "Get Scale")
-        .def("rotation", [](const Transform& t) { return t.GetRotation(); }, "Get Rotation")
-        .def("response", [](const Transform& t) { return t.GetResponse(); }, "Get Response")
-        .def("to_dict", [](const Transform& t) { return py::dict("x"_a = t.GetOffsetX(), "y"_a = t.GetOffsetY(), "scale"_a = t.GetScale(), "rotation"_a = t.GetRotation(), "response"_a = t.GetResponse()); });
+        .def("to_dict", [](const Transform& t) { return py::dict("x"_a = t.x, "y"_a = t.y, "scale"_a = t.scale, "rotation"_a = t.rotation, "response"_a = t.response); });
 
     py::class_<FourierMellin>(m, "FourierMellin")
         .def(py::init<std::string_view>())
