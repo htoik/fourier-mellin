@@ -56,12 +56,8 @@ std::tuple<cv::Mat, Transform> FourierMellin::GetRegisteredImage(std::string_vie
 }
 
 cv::Mat FourierMellin::ConvertImageToLogPolar(const cv::Mat& img) const {
-    auto img2 = PreprocessImage(img);
-    return logPolarMap_.ConvertToLogPolar(img2);
-}
-
-cv::Mat FourierMellin::PreprocessImage(const cv::Mat& img) const {
-    return imageFilter_.GetFilteredImage(img);
+    auto filtered = imageFilter_.GetFilteredImage(img);
+    return logPolarMap_.ConvertToLogPolar(filtered);
 }
 
 cv::Mat FourierMellin::ReadGrayscaleImageFromFile(std::string_view img_fp) const {

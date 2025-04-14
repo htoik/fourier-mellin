@@ -29,7 +29,6 @@ class FourierMellin {
 
    private:
     cv::Mat ReadGrayscaleImageFromFile(std::string_view img_fp) const;
-    cv::Mat PreprocessImage(const cv::Mat& img) const;
     cv::Mat ConvertImageToLogPolar(const cv::Mat& img) const;
 
    private:
