@@ -1,12 +1,12 @@
 #ifndef __TRANSFORM_H__
 #define __TRANSFORM_H__
 
+#include <opencv2/core/mat.hpp>
 #include <ostream>
-#include <opencv2/opencv.hpp>
 
-class Transform{
-public:
-    Transform(double xOffset=0.0, double yOffset=0.0, double scale=1.0, double rotationDeg=0.0, double response=1.0);
+class Transform {
+   public:
+    Transform(double xOffset = 0.0, double yOffset = 0.0, double scale = 1.0, double rotationDeg = 0.0, double response = 1.0);
 
     // TODO: This assumes `matrix` is properly defined 2D transformation matrix
     Transform(const cv::Mat& matrix, double response);
@@ -31,7 +31,7 @@ public:
     Transform operator*(const Transform& rhs) const;
     Transform& operator*=(const Transform& rhs);
 
-private:
+   private:
     double xOffset_;
     double yOffset_;
     double scale_;
@@ -41,4 +41,4 @@ private:
 
 std::ostream& operator<<(std::ostream& os, const Transform& t);
 
-#endif // __TRANSFORM_H__
+#endif  // __TRANSFORM_H__

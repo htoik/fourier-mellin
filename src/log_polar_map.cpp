@@ -1,6 +1,10 @@
 #include "log_polar_map.hpp"
 
 #include <numbers>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 constexpr long double pi = std::numbers::pi_v<long double>;
 
@@ -11,15 +15,6 @@ LogPolarMap::LogPolarMap(int width, int height) : width_(width),
                                                   height_(height),
                                                   logPolarSize_(0),
                                                   logBase_(0.0) {
-    ConstructMaps();
-}
-
-LogPolarMap::LogPolarMap(LogPolarMap&& rhs) : LogPolarMap(rhs.width_, rhs.height_) {
-}
-
-LogPolarMap& LogPolarMap::operator=(LogPolarMap&& rhs) {
-    width_ = rhs.width_;
-    height_ = rhs.height_;
     ConstructMaps();
 }
 
@@ -49,4 +44,12 @@ void LogPolarMap::ConstructMaps() {
             yMap_.at<float>(i, j) = scale * sin_angle + height_ / 2.0f;
         }
     }
+}
+
+int LogPolarMap::GetLogPolarSize() const {
+    return logPolarSize_;
+}
+
+double LogPolarMap::GetLogBase() const {
+    return logBase_;
 }

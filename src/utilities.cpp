@@ -2,36 +2,12 @@
 
 #include <numbers>
 #include <iostream>
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
 
 constexpr long double pi = std::numbers::pi_v<long double>;
-
-// LogPolarMap createLogPolarMap(int cols, int rows){
-//     // TODO: Improve this 
-//     int logPolarSize = std::max(cols, rows);
-//     double logBase = std::exp(std::log(logPolarSize * 1.5 / 2.0) / logPolarSize);
-//     float ellipse_coefficient = rows / (float)cols;
-
-//     cv::Mat xMap(logPolarSize, logPolarSize, CV_32FC1);
-//     cv::Mat yMap(logPolarSize, logPolarSize, CV_32FC1);
-
-//     for(int i=0; i<logPolarSize; i++){
-//         float angle = -(pi / logPolarSize) * i;
-//         float cos_angle = std::cos(angle) / ellipse_coefficient;
-//         float sin_angle = std::sin(angle);
-
-//         for(int j=0; j<logPolarSize; j++){
-//             float scale = std::pow(logBase, j);
-//             xMap.at<float>(i, j) = scale * cos_angle + cols / 2.0f;
-//             yMap.at<float>(i, j) = scale * sin_angle + rows / 2.0f;
-//         }
-//     }
-//     return LogPolarMap{
-//         .logPolarSize=logPolarSize,
-//         .logBase=logBase,
-//         .xMap=xMap,
-//         .yMap=yMap,
-//     };
-// }
 
 cv::Mat fft(const cv::Mat& img) {
     cv::Mat planes[] = {cv::Mat_<float>(img), cv::Mat::zeros(img.size(), CV_32F)};

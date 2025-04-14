@@ -1,5 +1,10 @@
 #include "fourier_mellin.hpp"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+
 FourierMellin::FourierMellin(const cv::Mat& reference) : width_(reference.size().width),
                                                          height_(reference.size().height),
                                                          logPolarMap_(width_, height_),
@@ -7,9 +12,7 @@ FourierMellin::FourierMellin(const cv::Mat& reference) : width_(reference.size()
                                                          referenceImg_(reference.clone()),
                                                          referenceImgLogPolar_(ConvertImageToLogPolar(referenceImg_)) {
     // TODO: assumes one channel, and normalized float, like other constructor
-    // if (referenceImg_.depth() != CV_32F) {
-    //     referenceImg_.convertTo(referenceImg_, CV_32F, 1.0 / 255.0);
-    // }
+    // throw error if not float, and one channel
 }
 
 FourierMellin::FourierMellin(std::string_view reference_fp) : FourierMellin(ReadGrayscaleImageFromFile(reference_fp)) {}
@@ -17,10 +20,13 @@ FourierMellin::FourierMellin(std::string_view reference_fp) : FourierMellin(Read
 Transform FourierMellin::RegisterImage(const cv::Mat& target) const {
     const auto& logPolarTarget = ConvertImageToLogPolar(target);
 
+    int logPolarSize = logPolarMap_.GetLogPolarSize();
+    double logBase = logPolarMap_.GetLogBase();
+
     double responseScaleRotation;
     auto [logScale, logRotation] = cv::phaseCorrelate(logPolarTarget, referenceImgLogPolar_, cv::noArray(), &responseScaleRotation);
-    double rotation = -logRotation / logPolarMap_.logPolarSize_ * 180.0;
-    double scale = std::pow(logPolarMap_.logBase_, logScale);
+    double rotation = -logRotation / logPolarSize * 180.0;
+    double scale = std::pow(logBase, logScale);
 
     const auto center = cv::Point(width_, height_) / 2.0;
     cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, rotation, scale);
@@ -52,23 +58,10 @@ std::tuple<cv::Mat, Transform> FourierMellin::GetRegisteredImage(std::string_vie
 cv::Mat FourierMellin::ConvertImageToLogPolar(const cv::Mat& img) const {
     auto img2 = PreprocessImage(img);
     return logPolarMap_.ConvertToLogPolar(img2);
-    // cv::Mat log_polar;
-    // cv::remap(img2, log_polar, logPolarMap_.xMap, logPolarMap_.yMap, cv::INTER_LANCZOS4, cv::BORDER_CONSTANT, cv::Scalar());
-    // return log_polar;
 }
 
 cv::Mat FourierMellin::PreprocessImage(const cv::Mat& img) const {
     return imageFilter_.GetFilteredImage(img);
-    // cv::Mat apodized = img.mul(apodizationWindow_);
-    // cv::Mat dftResult = fft(apodized);
-    // cv::Mat filtered = fftShift(dftResult);
-    // cv::multiply(filtered, highPassFilter_, filtered);
-
-    // std::vector<cv::Mat> channels(2);
-    // cv::split(filtered, channels);
-    // cv::Mat magnitude;
-    // cv::magnitude(channels[0], channels[1], magnitude);
-    // return magnitude;
 }
 
 cv::Mat FourierMellin::ReadGrayscaleImageFromFile(std::string_view img_fp) const {

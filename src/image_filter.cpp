@@ -1,5 +1,10 @@
 #include "image_filter.hpp"
 
+#include <opencv2/core/core.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
+#include <opencv2/opencv.hpp>
+
 #include "utilities.hpp"
 
 ImageFilter::ImageFilter(int width, int height) : width_(width),

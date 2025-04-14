@@ -1,31 +1,28 @@
 #ifndef __LOG_POLAR_MAP_H__
 #define __LOG_POLAR_MAP_H__
 
-#include <opencv2/core/core.hpp>
-#include <opencv2/highgui/highgui.hpp>
-#include <opencv2/imgproc/imgproc.hpp>
-#include <opencv2/opencv.hpp>
+#include <opencv2/core/mat.hpp>
 
 class LogPolarMap {
    public:
    LogPolarMap();
    LogPolarMap(int width, int height);
-   LogPolarMap(LogPolarMap&& rhs);
-   LogPolarMap& operator=(LogPolarMap&&rhs);
     
     cv::Mat ConvertToLogPolar(const cv::Mat& img) const;
-    // int GetLogPolarSize() const;
-    // double GetLogBase() const;
-    // std::tuple<const cv::Mat&, const cv::Mat&> GetMaps() const;
+    
+    int GetLogPolarSize() const;
+    double GetLogBase() const;
 
     ~LogPolarMap() = default;
     LogPolarMap(const LogPolarMap&) = delete;
+    LogPolarMap(LogPolarMap&& rhs) = delete;
     LogPolarMap& operator=(const LogPolarMap&) = delete;
+    LogPolarMap& operator=(LogPolarMap&&rhs) = delete;
 
    private:
     void ConstructMaps();
 
-   public: // TODO
+   private:
     int width_, height_;
     int logPolarSize_;
     double logBase_;
