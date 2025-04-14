@@ -3,9 +3,11 @@ cmake_minimum_required(VERSION 3.27)
 find_package(OpenCV REQUIRED)
 
 set(SOURCES
-    fourier_mellin_simple.cpp
+    fourier_mellin.cpp
     utilities.cpp
     transform.cpp
+    log_polar_map.cpp
+    image_filter.cpp
 )
 
 add_library(fourier-mellin-library STATIC ${SOURCES})

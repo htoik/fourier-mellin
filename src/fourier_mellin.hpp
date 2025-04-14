@@ -5,6 +5,8 @@
 #include <string_view>
 #include <tuple>
 
+#include "image_filter.hpp"
+#include "log_polar_map.hpp"
 #include "transform.hpp"
 #include "utilities.hpp"
 
@@ -33,12 +35,12 @@ class FourierMellin {
    private:
     int width_, height_;
     LogPolarMap logPolarMap_;
+    ImageFilter imageFilter_;
+    // cv::Mat highPassFilter_;
+    // cv::Mat apodizationWindow_;
 
-    cv::Mat highPassFilter_;
-    cv::Mat apodizationWindow_;
-    
     cv::Mat referenceImg_;
     cv::Mat referenceImgLogPolar_;
 };
 
-#endif // __FOURIER_MELLIN_H__
+#endif  // __FOURIER_MELLIN_H__

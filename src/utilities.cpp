@@ -5,42 +5,33 @@
 
 constexpr long double pi = std::numbers::pi_v<long double>;
 
-LogPolarMap createLogPolarMap(int cols, int rows){
-    // TODO: Improve this 
-    int logPolarSize = std::max(cols, rows);
-    double logBase = std::exp(std::log(logPolarSize * 1.5 / 2.0) / logPolarSize);
-    float ellipse_coefficient = rows / (float)cols;
+// LogPolarMap createLogPolarMap(int cols, int rows){
+//     // TODO: Improve this 
+//     int logPolarSize = std::max(cols, rows);
+//     double logBase = std::exp(std::log(logPolarSize * 1.5 / 2.0) / logPolarSize);
+//     float ellipse_coefficient = rows / (float)cols;
 
-    cv::Mat xMap(logPolarSize, logPolarSize, CV_32FC1);
-    cv::Mat yMap(logPolarSize, logPolarSize, CV_32FC1);
+//     cv::Mat xMap(logPolarSize, logPolarSize, CV_32FC1);
+//     cv::Mat yMap(logPolarSize, logPolarSize, CV_32FC1);
 
-    for(int i=0; i<logPolarSize; i++){
-        float angle = -(pi / logPolarSize) * i;
-        float cos_angle = std::cos(angle) / ellipse_coefficient;
-        float sin_angle = std::sin(angle);
+//     for(int i=0; i<logPolarSize; i++){
+//         float angle = -(pi / logPolarSize) * i;
+//         float cos_angle = std::cos(angle) / ellipse_coefficient;
+//         float sin_angle = std::sin(angle);
 
-        for(int j=0; j<logPolarSize; j++){
-            float scale = std::pow(logBase, j);
-            xMap.at<float>(i, j) = scale * cos_angle + cols / 2.0f;
-            yMap.at<float>(i, j) = scale * sin_angle + rows / 2.0f;
-        }
-    }
-    return LogPolarMap{
-        .logPolarSize=logPolarSize,
-        .logBase=logBase,
-        .xMap=xMap,
-        .yMap=yMap,
-    };
-}
-
-cv::Mat getLogPolarImage(const cv::Mat& img, const cv::Mat& polarMapX, const cv::Mat& polarMapY){
-    std::vector<cv::Mat> planes(2);
-    cv::Mat log_polar;
-    cv::split(img, planes);
-    cv::magnitude(planes[0], planes[1], log_polar);
-    cv::remap(log_polar, log_polar, polarMapX, polarMapY, cv::INTER_CUBIC, cv::BORDER_CONSTANT, cv::Scalar());
-    return log_polar;
-}
+//         for(int j=0; j<logPolarSize; j++){
+//             float scale = std::pow(logBase, j);
+//             xMap.at<float>(i, j) = scale * cos_angle + cols / 2.0f;
+//             yMap.at<float>(i, j) = scale * sin_angle + rows / 2.0f;
+//         }
+//     }
+//     return LogPolarMap{
+//         .logPolarSize=logPolarSize,
+//         .logBase=logBase,
+//         .xMap=xMap,
+//         .yMap=yMap,
+//     };
+// }
 
 cv::Mat fft(const cv::Mat& img) {
     cv::Mat planes[] = {cv::Mat_<float>(img), cv::Mat::zeros(img.size(), CV_32F)};
@@ -118,14 +109,6 @@ cv::Mat getApodizationWindow(int cols, int rows, int radius){
     return hanningWindow;
 }
 
-cv::Mat getFilteredImage(const cv::Mat &gray, const cv::Mat& apodizationWindow, const cv::Mat& highPassFilter){
-    cv::Mat apodized = gray.mul(apodizationWindow);
-    cv::Mat dftResult = fft(apodized);
-    cv::Mat filtered = fftShift(dftResult);
-    cv::multiply(filtered, highPassFilter, filtered);
-    return filtered;
-}
-
 cv::Mat getTransformed(const cv::Mat& img, const Transform& transform) {
     // TODO: Interpolation
 
@@ -151,32 +134,4 @@ cv::Mat getCropped(const cv::Mat& img, double x1, double y1, double x2, double y
 
     cv::Mat cropped = img(roi);
     return cropped;
-}
-
-cv::Mat getProcessedImage(const cv::Mat &img, const cv::Mat& highPassFilter, const cv::Mat& apodizationWindow, const LogPolarMap& logPolarMap) {
-    auto filtered0 = getFilteredImage(img, apodizationWindow, highPassFilter);
-    auto logPolar0 = getLogPolarImage(filtered0, logPolarMap.xMap, logPolarMap.yMap);
-    return logPolar0;
-}
-
-Transform registerGrayImage(const cv::Mat &img0, const cv::Mat &img1, const cv::Mat &logPolar0, const cv::Mat &logPolar1, const LogPolarMap& logPolarMap) {
-    auto[logScale, logRotation] = cv::phaseCorrelate(logPolar1, logPolar0);
-    double rotation = -logRotation / logPolarMap.logPolarSize * 180.0;
-    double scale = 1.0 / std::pow(logPolarMap.logBase, -logScale);
-
-    const auto center = cv::Point(img0.cols, img0.rows) / 2.0;
-    cv::Mat rotationMatrix = cv::getRotationMatrix2D(center, rotation, scale);
-    cv::Mat rotated0;
-    cv::warpAffine(img0, rotated0, rotationMatrix, img0.size());
-
-    double response;
-    auto[xOffset, yOffset] = cv::phaseCorrelate(img1, rotated0, cv::noArray(), &response);
-
-    return Transform(
-        -xOffset,
-        yOffset,
-        scale,
-        rotation,
-        response
-    );
 }
