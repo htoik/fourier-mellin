@@ -81,6 +81,9 @@ std::string to_string_with_precision(const T value, const int n = 2) {
 PYBIND11_MODULE(MODULE_NAME, m) {
     py::class_<Transform>(m, "Transform")
         .def(py::init<>())
+        .def(py::init([](double x, double y, double scale, double rotation, double response) {
+            return new Transform{x, y, scale, rotation, response};
+        }))
         .def("__repr__", [](const Transform& t) {
             // TODO: use the operator<< format previously defined instead for consistency
             return "<" TOSTRING(MODULE_NAME) ".Transform x_offset=" + to_string_with_precision(t.x, 2) + ", y_offset=" + to_string_with_precision(t.y, 2) + ", rotation=" + to_string_with_precision(t.rotation, 2) + ", scale=" + to_string_with_precision(t.scale, 2) + ", response=" + to_string_with_precision(t.response, 2) + ">";
@@ -113,12 +116,19 @@ PYBIND11_MODULE(MODULE_NAME, m) {
             return new FourierMellin(referenceMat);
         }))
         .def("register_image", [](const FourierMellin& fm, std::string_view target_fp) -> auto {
-                    auto[transformed, transform] = fm.GetRegisteredImage(target_fp);
-                    return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target")
+                    auto transform = fm.RegisterImage(target_fp);
+                    return transform; }, "Register target image to reference.")
         .def("register_image", [](const FourierMellin& fm, py::array_t<float> target) -> auto {
             auto targetMat = numpy_to_mat<0>(target).clone();
-            auto[transformed, transform] = fm.GetRegisteredImage(targetMat);
-            return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target");
+            auto transform = fm.RegisterImage(targetMat);
+            return transform; }, "Register target image to reference.");
+    // .def("register_image", [](const FourierMellin& fm, std::string_view target_fp) -> auto {
+    //             auto[transformed, transform] = fm.GetRegisteredImage(target_fp);
+    //             return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target")
+    // .def("register_image", [](const FourierMellin& fm, py::array_t<float> target) -> auto {
+    //     auto targetMat = numpy_to_mat<0>(target).clone();
+    //     auto[transformed, transform] = fm.GetRegisteredImage(targetMat);
+    //     return std::make_tuple(mat_to_numpy(transformed), transform); }, "Register target image to reference and return aligned target");
 
     m.def("get_transformed", [](const py::array_t<float>& img, Transform transform) {
         auto mat = numpy_to_mat<0>(img);

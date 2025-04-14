@@ -8,16 +8,24 @@
 FourierMellin::FourierMellin(const cv::Mat& reference) : width_(reference.size().width),
                                                          height_(reference.size().height),
                                                          logPolarMap_(width_, height_),
-                                                         imageFilter_(width_, height_),
-                                                         referenceImg_(reference.clone()),
-                                                         referenceImgLogPolar_(ConvertImageToLogPolar(referenceImg_)) {
+                                                         imageFilter_(width_, height_) {
     // TODO: assumes one channel, and normalized float, like other constructor
     // throw error if not float, and one channel
+    referenceImg_ = reference.clone();
+    if (referenceImg_.channels() == 3) {
+        cv::cvtColor(referenceImg_, referenceImg_, cv::COLOR_RGB2GRAY);
+    } else if (referenceImg_.channels() != 1) {
+        throw std::runtime_error(std::string("Could not convert to LogPolar with ") + std::to_string(referenceImg_.channels()) + " channels. (Only single-channel images.)");
+    }
+    referenceImgLogPolar_ = ConvertImageToLogPolar(referenceImg_);
 }
 
 FourierMellin::FourierMellin(std::string_view reference_fp) : FourierMellin(ReadGrayscaleImageFromFile(reference_fp)) {}
 
 Transform FourierMellin::RegisterImage(const cv::Mat& target) const {
+    if (target.channels() != 1) {
+        throw std::runtime_error(std::string("Could not register image with ") + std::to_string(target.channels()) + " channels. (Only single-channel images.)");
+    }
     const auto& logPolarTarget = ConvertImageToLogPolar(target);
 
     int logPolarSize = logPolarMap_.GetLogPolarSize();
