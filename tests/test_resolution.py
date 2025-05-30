@@ -69,3 +69,6 @@ def test_resolution_1():
     overlap = (img1_transformed//2 + img2//2)
     cv2.imwrite("output/testres1_overlap.jpg", overlap)
     # TODO: check MSE, but also works visually
+
+
+
