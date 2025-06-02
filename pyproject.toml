@@ -35,3 +35,6 @@ dependencies = [
 py-modules = ["fourier_mellin"]
 include-package-data = true
 zip-safe = false
+
+[tool.black]
+line-length = 120

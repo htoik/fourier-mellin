@@ -1,0 +1,19 @@
+{
+    "name": "Fourier-Mellin C++/Python",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": ".."
+    },
+    "settings": {
+        "terminal.integrated.shell.linux": "/bin/bash"
+    },
+    "extensions": [
+        "ms-python.python",
+        "ms-vscode.cpptools",
+        "ms-vscode.cmake-tools"
+    ],
+    "forwardPorts": [],
+    "remoteUser": "vscode",
+    "workspaceFolder": "/workspace",
+    "postCreateCommand": "git config --global --add safe.directory /workspace && pre-commit install"
+}

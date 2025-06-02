@@ -1,12 +1,11 @@
-import numpy as np
 import cv2
-from fourier_mellin import(
-    FourierMellin,
-)
+import numpy as np
+from fourier_mellin import FourierMellin
+
 
 def stabilize_video(input_path, output_path):
     cap = cv2.VideoCapture(input_path)
-    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 
     flag, firstFrame = cap.read()
     if not flag:
@@ -23,8 +22,9 @@ def stabilize_video(input_path, output_path):
         # print(img.shape, t)
         out.write(img.astype(np.uint8))
     out.release()
-        
-if __name__ == '__main__':
+
+
+if __name__ == "__main__":
     input_path = "resources/shaky_drone.mp4"
     output_path = "output/stabilized_shaky_drone.mp4"
     stabilize_video(input_path, output_path)
