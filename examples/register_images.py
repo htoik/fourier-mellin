@@ -1,8 +1,5 @@
-import numpy as np
 import cv2
-from fourier_mellin import(
-    FourierMellin,
-)
+from fourier_mellin import FourierMellin
 
 img0_path = "resources/road2_clear.png"
 img1_path = "resources/road2_dark.png"
