@@ -35,14 +35,16 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/htoik/fourier-mellin/manylinux_x86_64:latest
     needs: pre-commit
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Install CMake
-        run: sudo apt-get update && sudo apt-get install -y cmake build-essential
+      # - name: Install CMake
+      #   run: sudo apt-get update && sudo apt-get install -y cmake build-essential
 
       - name: Build C++
         working-directory: ${{ github.workspace }}
